@@ -1,0 +1,1 @@
+Real Gotland loop returned by the public BRouter service on 2026-10-13. Map data © OpenStreetMap contributors, ODbL (https://www.openstreetmap.org/copyright). Routing BRouter. This fixture is only used in tests and is never displayed as a generated route.

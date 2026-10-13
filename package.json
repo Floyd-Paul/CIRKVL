@@ -1,0 +1,13 @@
+{
+  "name": "cirkvl",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Circular cycling routes on open map data. Static and GitHub Pages ready.",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "node scripts/check.mjs",
+    "dev": "python3 -m http.server 4173 --directory dist"
+  },
+  "engines": {"node": ">=22"}
+}

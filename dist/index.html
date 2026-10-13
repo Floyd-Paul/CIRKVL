@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f6f0">
+  <meta name="description" content="Good rides come full circle. Find circular cycling routes from your location, choose your terrain and distance, and take your ride to your watch.">
+  <title>CIRKVL — Find your way back</title>
+  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./vendor/leaflet.css">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./vendor/leaflet.js" defer></script>
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+  <svg class="icon-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.4"/></symbol>
+    <symbol id="i-location" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></symbol>
+    <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 4h12v17l-6-4-6 4Z"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol>
+    <symbol id="i-mountain" viewBox="0 0 24 24"><path d="m2 20 9-16 11 16Zm5.7-10 3.3 3 3.2-3"/></symbol>
+    <symbol id="i-time" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 10 6-10 6L2 9Zm-10 11 10 6 10-6"/></symbol>
+    <symbol id="i-loop" viewBox="0 0 24 24"><path d="M19 7a8 8 0 1 0 1 9M19 3v5h-5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-gravel" viewBox="0 0 36 28"><path d="m1 22 8-5 6 3 8-7 12 7M1 11l9-3 6 3 7-7 12 5"/><circle cx="5" cy="26" r=".6"/><circle cx="18" cy="25" r=".6"/><circle cx="29" cy="25" r=".6"/><circle cx="4" cy="3" r=".6"/></symbol>
+    <symbol id="i-trail" viewBox="0 0 36 28"><path d="M19 27c-12-7 13-7 3-14C13 7 20 5 25 1M3 15V6m-3 5 3-5 3 5M31 24v-9m-3 5 3-5 3 5"/></symbol>
+    <symbol id="i-road" viewBox="0 0 36 28"><path d="m6 28 7-27m17 27-7-27M18 2v4m0 4v5m0 5v6"/></symbol>
+  </defs></svg>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="CIRKVL home"><svg class="brand-mark" viewBox="0 0 42 42" aria-hidden="true"><path d="M31 8a16 16 0 1 0 6 14"/><path d="m26 8 8 1-1-8"/></svg><span>CIRKVL<span class="brand-dot">.</span></span></a>
+    <span class="brand-caption">GOOD RIDES COME FULL CIRCLE</span>
+    <nav class="topnav" aria-label="Main navigation">
+      <button type="button" class="nav-active" id="plan-nav">Plan a ride</button>
+      <button type="button" id="saved-nav"><svg class="icon"><use href="#i-bookmark"/></svg><span>Saved rides</span><span class="count" id="saved-count">0</span></button>
+      <button type="button" id="about-nav" class="about-nav">How it works <span aria-hidden="true">↗</span></button>
+    </nav>
+  </header>
+  <main class="workspace">
+    <aside class="planner" aria-label="Plan your circular ride">
+      <div class="planner-top"><span class="eyebrow"><span class="status-dot"></span> A DIFFERENT WAY AROUND</span><h1>Out. Around.<br>Back again<span>.</span></h1><p class="intro">A fresh loop, on your kind of terrain.<br>All you need is a starting point.</p></div>
+      <form id="planner-form">
+        <section class="field-section start-section">
+          <div class="section-label"><span class="step">01</span><label for="place-input">Start somewhere</label></div>
+          <button class="location-button" type="button" id="locate-button"><svg class="icon"><use href="#i-location"/></svg>Use my location<svg class="icon small"><use href="#i-arrow"/></svg></button>
+          <div class="search-wrap"><svg class="icon"><use href="#i-search"/></svg><input id="place-input" type="search" placeholder="Search a town or coordinates" autocomplete="off" maxlength="160" aria-label="Search a starting place or latitude, longitude"><button type="button" id="search-button" aria-label="Search place"><svg class="icon"><use href="#i-arrow"/></svg></button></div>
+          <div class="search-results" id="search-results" hidden></div>
+          <div class="start-display" id="start-display" hidden><svg class="icon"><use href="#i-pin"/></svg><div><strong id="start-name"></strong><small id="start-coordinates"></small></div><button type="button" id="clear-start" aria-label="Clear starting point"><svg class="icon small"><use href="#i-close"/></svg></button></div>
+          <button type="button" class="map-pick" id="pick-button"><svg class="icon small"><use href="#i-pin"/></svg>Or choose a point on the map</button>
+        </section>
+        <section class="field-section terrain-section">
+          <div class="section-label"><span class="step">02</span><span id="terrain-label">Find your terrain</span></div>
+          <div class="terrain-picker" role="group" aria-labelledby="terrain-label">
+            <button type="button" class="terrain active" data-terrain="gravel" aria-pressed="true"><svg class="terrain-icon"><use href="#i-gravel"/></svg><strong>Gravel</strong><small>The roads less ridden</small><span class="terrain-tick"><svg class="icon small"><use href="#i-check"/></svg></span></button>
+            <button type="button" class="terrain" data-terrain="singletrack" aria-pressed="false"><svg class="terrain-icon"><use href="#i-trail"/></svg><strong>Single track</strong><small>A little more wild</small><span class="terrain-tick"><svg class="icon small"><use href="#i-check"/></svg></span></button>
+            <button type="button" class="terrain" data-terrain="road" aria-pressed="false"><svg class="terrain-icon"><use href="#i-road"/></svg><strong>Road</strong><small>Keep it rolling</small><span class="terrain-tick"><svg class="icon small"><use href="#i-check"/></svg></span></button>
+          </div>
+          <p class="field-hint" id="terrain-hint">Prefer gravel and compacted tracks, with paved links where needed.</p>
+        </section>
+        <section class="field-section distance-section">
+          <div class="section-label"><span class="step">03</span><label for="distance">How far feels good?</label></div>
+          <div class="distance-value"><output id="distance-output" for="distance">30</output><span>km</span><div class="distance-note"><svg class="icon"><use href="#i-loop"/></svg>Back to your start</div></div>
+          <input type="range" id="distance" min="5" max="120" step="5" value="30" aria-valuetext="30 kilometres">
+          <div class="range-labels"><span>A quick spin · 5 km</span><span>The long way · 120 km</span></div>
+          <p class="field-hint">A target, with room for the trail. Actual distances are shown on every option.</p>
+        </section>
+        <button type="submit" class="generate-button" id="generate-button"><svg class="icon"><use href="#i-loop"/></svg><span>Find my 5 loops</span><svg class="icon"><use href="#i-arrow"/></svg></button>
+        <button type="button" id="cancel-button" class="cancel-button" hidden>Cancel route search</button>
+        <p class="form-message" id="form-message" role="status" aria-live="polite"></p>
+      </form>
+      <footer class="planner-footer"><span class="open-dot"></span>Open maps. Open possibilities.<button type="button" id="data-button" aria-label="About map data and privacy">ⓘ</button></footer>
+    </aside>
+    <section class="map-workspace" aria-label="Map and route options">
+      <div id="map" role="region" aria-label="Interactive cycling map. Use the choose point button to set your start."></div>
+      <div id="map-unavailable" hidden><strong>The map couldn’t load.</strong><p>You can still search for a start and export a route. Reload to try the map again.</p></div>
+      <div class="map-hud"><span class="map-label"><span class="status-dot"></span><span id="map-area">GOTLAND, SWEDEN</span></span><div class="map-tools"><button type="button" id="fit-button" aria-label="Fit routes or starting point to map" title="Fit route"><svg class="icon"><use href="#i-location"/></svg></button><button type="button" id="surface-button" aria-pressed="false" title="Colour the selected route by surface" aria-label="Colour selected route by surface"><svg class="icon"><use href="#i-layers"/></svg></button></div></div>
+      <div class="map-pick-banner" id="pick-banner" hidden><svg class="icon"><use href="#i-pin"/></svg>Tap the map to set your starting point<button type="button" id="cancel-pick">Cancel</button></div>
+      <div class="map-empty" id="map-empty"><div class="empty-loop" aria-hidden="true"><svg viewBox="0 0 200 160"><path class="empty-shadow" d="M83 131c-62-8-75-75-41-96 30-19 45 1 72-14 28-15 65 4 61 36-3 27-44 17-35 45 10 31-29 33-57 29Z"/><path d="M83 122c-56-7-68-69-37-88 27-17 40 1 65-13 25-14 59 4 55 33-3 24-40 15-32 41 9 28-25 31-51 27Z"/><circle cx="82" cy="122" r="6"/><path class="empty-arrow" d="m149 21 10 8-12 5"/></svg><span class="loop-coordinate">START = FINISH</span></div><span class="eyebrow">THERE’S A LOOP WITH YOUR NAME ON IT</span><h2>Where will you<br>come back from?</h2><p>Choose your start, pick your terrain,<br>and see what’s around the next bend.</p><button type="button" id="try-gotland">Explore around Bro, Gotland <svg class="icon small"><use href="#i-arrow"/></svg></button></div>
+      <div class="search-progress" id="search-progress" hidden role="status"><div class="progress-orbit" aria-hidden="true"></div><div><strong id="progress-heading">Finding your way around…</strong><p id="progress-text">Following real roads and trails. This can take a minute.</p></div><span id="progress-count">0 / 5</span></div>
+      <section class="results-panel" id="results-panel" hidden aria-label="Circular route choices">
+        <div class="results-heading"><div><span class="eyebrow">FIVE WAYS TO COME FULL CIRCLE</span><h2 id="results-title">Your next ride, found.</h2></div><span class="result-count" id="result-count">5 loops</span></div>
+        <div class="route-cards" id="route-cards"></div>
+        <div class="result-notice" id="result-notice" hidden role="status"></div>
+      </section>
+      <section class="selected-panel" id="selected-panel" hidden aria-label="Selected route details"></section>
+      <div class="map-legend" id="map-legend" hidden aria-label="Map surface colour legend"></div>
+      <div class="map-credit"><span>CIRKVL ROUTE PLANNER</span><span>Made for the way back.</span></div>
+    </section>
+  </main>
+  <div class="toast" id="toast" hidden role="status" aria-live="polite"></div>
+  <dialog id="saved-dialog" class="app-dialog"><div class="dialog-header"><div><span class="eyebrow">GOOD RIDES, KEPT CLOSE</span><h2>Saved rides<span>.</span></h2></div><button type="button" class="dialog-close" data-close-dialog aria-label="Close saved rides"><svg class="icon"><use href="#i-close"/></svg></button></div><p class="dialog-intro">Saved on this device. Export a GPX to take one with you.</p><div id="saved-list"></div></dialog>
+  <dialog id="about-dialog" class="app-dialog about-dialog"><div class="dialog-header"><div><span class="eyebrow">A LITTLE DIRECTION</span><h2>The way around<span>.</span></h2></div><button type="button" class="dialog-close" data-close-dialog aria-label="Close information"><svg class="icon"><use href="#i-close"/></svg></button></div>
+    <div class="about-steps"><div><span>01</span><h3>Start where you are.</h3><p>Use your location, search for a place, enter latitude and longitude, or choose a point on the map.</p></div><div><span>02</span><h3>Ride your kind of ride.</h3><p>Pick your terrain and distance. CIRKVL searches in different directions, routes along mapped roads and trails, then ranks up to five distinct loops by terrain match and distance.</p></div><div><span>03</span><h3>Take the loop with you.</h3><p>Save it here or export GPX. In the Suunto app, open Maps → + → Import route (.gpx), save the route, and enable it for your watch. GPX also works with other apps that support route imports.</p><a href="https://www.suunto.com/Support/faq-articles/suunto-app/what-files-can-i-import-to-the-suunto-app/" target="_blank" rel="noopener">Suunto’s import guide ↗</a></div></div>
+    <details open><summary>What the terrain numbers mean</summary><p>Surface percentages are weighted by section distance using OpenStreetMap surface tags returned by BRouter. Missing or broad tags such as “unpaved” stay unknown. Gravel includes gravel, fine gravel, and compacted surfaces. Trail share is an estimate from path and MTB tags; a narrow single track cannot be guaranteed where widths are unmapped. Your preferred terrain is a preference, and connecting sections can use other surfaces.</p><p>Roads, trail access, and conditions can change. Review the map and respect signs and local access rules. Sparse networks, coasts, and service availability may produce fewer than five loops. Actual length and any repeated sections are shown.</p></details>
+    <details><summary>Open data & your location</summary><p>Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>, ODbL. Routing and elevation by <a href="https://brouter.de/" target="_blank" rel="noopener">BRouter</a>. Map rendering by Leaflet. CIRKVL has no account, tracking scripts, or analytics.</p><p>Your location is requested only when you tap the location button. Route waypoints go to the routing service when you generate a ride, search text goes to Nominatim when you search, and the map service receives the viewed tile area. Saved routes remain in this browser’s local storage and won’t sync to other devices. Online services are needed for new routes and maps.</p></details>
+  </dialog>
+  <noscript><div class="noscript-message">CIRKVL needs JavaScript for its map and route planner. Please enable it and reload.</div></noscript>
+</body>
+</html>
